@@ -1,20 +1,31 @@
-// GASのWebhookのデバッグ用
-// 解放すると通信があるたびに動くので、デバッグが終わったらコメントアウトする
-function doGet(e) {
-  // ここのリプライトークンは意味のないものにしているが、groupには送れる
-  // send_message("curlデバッグ: アクセスポイントチェック", 'https://api.line.me/v2/bot/message/push', "リプライトークン");
-}
-
-// Lineの送信受け
 function doPost(e) {
+  // 引数に必要なデータを検証
+  if(e == undefined
+    && e.postData == undefined
+    && e.postData.contents == undefined
+  ) return;
+
+  // [TODO] parse処理自体の成功チェックや、parseしたjsonの妥当性検証
   let json = JSON.parse(e.postData.contents);
+
+  // 反応する処理を決定する
+  text = json.events[0].message.text.split(" ");
+  if(text.length == 0 && text.shift() != "@line") {
+    return;
+  }
+
+  // 処理を実行
+  message = main(text);
 
   // 送信元がトークかグループか判定して、適切な方へ返す
   let endpoint = (json.events[0].source.type == 'group')
     ? 'https://api.line.me/v2/bot/message/push'   // グループ
     : 'https://api.line.me/v2/bot/message/reply'  // トーク
   ;
-  send_message(JSON.stringify(json), endpoint, json.events[0].replyToken);
+
+  // デバッグする時は JSON.stringify(json)
+  // テキストだけを撮りたい場合は json.events[0].message.text
+  send_message(message, endpoint, json.events[0].replyToken);
 }
 
 function send_message(message, endpoint, reply_token) {
