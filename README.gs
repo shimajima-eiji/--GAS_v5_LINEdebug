@@ -7,6 +7,8 @@
 - [Gdrive:ディレクトリ](https://drive.google.com/drive/my-drive)
 - [Gdrive:スクリプト](https://script.google.com/home)
 - [Gdrive:スプレッドシート](https://docs.google.com/spreadsheets)
+- [LINEBOT:Webhookとチャネルアクセストークン](https://developers.line.biz/console/channel/(チャネルID)/messaging-api?status=success)
+- [LINEBOT:グループ設定など](https://manager.line.biz/account/(アカウントID)/setting)
 
 ## バージョン
 - README: ver1.2022.01.27

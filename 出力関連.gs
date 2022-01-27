@@ -10,7 +10,7 @@ function output_sheet(value = {}){
     message = "[COMPLETE]add data";
   }
 
-  Logger.log("output.gs/output_sheet: " + message);
+  debug("output.gs/output_sheet: " + message);
   return message;
 }
 
