@@ -1,59 +1,77 @@
 function doPost(e) {
+  // return doPost_minimum(e)  // 解説のため置いておく
+
+  // 以下、運用のための本スクリプト
+
+  output_sheet(e);  // デバッグのため、入力値をシートに書き出す
   // 引数に必要なデータを検証
   if(e == undefined
     && e.postData == undefined
     && e.postData.contents == undefined
+    && typeof e.postData.contents != "String"
   ) return;
 
   // [TODO] parse処理自体の成功チェックや、parseしたjsonの妥当性検証
-  let json = JSON.parse(e.postData.contents);
-
-  // 反応する処理を決定する
-  text = json.events[0].message.text.split(" ");
-  if(text.length == 0 && text.shift() != "@line") {
-    return;
-  }
-  // @lineの文字列を消しておく
-  text.shift();
+  let json = JSON.parse(e.postData.contents).events[0];
 
   // 処理を実行
-  message = main(text);
+  let message = main(json.message.text);
 
-  // 送信元がトークかグループか判定して、適切な方へ返す
-  let endpoint = (json.events[0].source.type == 'group')
-    ? 'https://api.line.me/v2/bot/message/push'   // グループ
-    : 'https://api.line.me/v2/bot/message/reply'  // トーク
-  ;
-
-  // デバッグする時は JSON.stringify(json)
-  // テキストだけを撮りたい場合は json.events[0].message.text
-  send_message(message, endpoint, json.events[0].replyToken);
+  send_line(message, json.replyToken, json.source.groupId);
 }
 
-function send_message(message, endpoint, reply_token) {
+// デバッグ時は有効なリプライトークンが必須なので、グループに送るならheaderにto: グループIDを入れる
+/* エラー例
+Exception: Request failed for https://api.line.me returned code 400. Truncated server response: {"message":"Invalid reply token"} (use muteHttpExceptions option to examine full response)
+---
+例外：https：//api.line.meのリクエストが失敗してコード400が返されました。サーバーの応答が切り捨てられました：{"メッセージ"： "無効な応答トークン"}（完全な応答を調べるにはmuteHttpExceptionsオプションを使用してください）
+*/
+function send_line(message, reply_token, group_id) {
+  const TOKEN = 'Bearer ' + property("ACCESS_TOKEN").value;
+
   // 引数チェック
   if(typeof message === 'undefined'
-  || typeof endpoint === 'undefined'
-  || typeof reply_token === 'undefined') return;
+  || typeof reply_token === 'undefined'
+  || typeof TOKEN === 'undefined'
+  ) return;
 
-  //LINE Developersで取得したアクセストークンを入れる
-  const property = PropertiesService.getScriptProperties();
+  // 送信元がトークかグループか判定して、適切な方へ返す
+  const TARGET_ENDPOINT = (group_id)
+    ? 'push'   // グループ
+    : 'reply'  // トーク
 
-  // メッセージを返信    
-  UrlFetchApp.fetch(endpoint, {
-    'headers': {
-      'Content-Type': 'application/json; charset=UTF-8',
-      'Authorization': 'Bearer ' + property.getProperty("channel_access_token"),
-    },
+  // メッセージを返信
+  let headers = {
+    'Content-Type': 'application/json; charset=UTF-8',
+    'Authorization': TOKEN,
+  };
+  let payload = {
+    'replyToken': reply_token,  // トークの場合必須。グループに送信した場合でも項目は存在する
+    'messages': [{
+      'type': 'text',
+      'text': message,
+    }],
+    'to': group_id  // group_idが存在しない場合はトークへ、存在する場合は当該グループをgroup_idで指定する
+  };
+
+  // 実行に失敗するケースもありえるのでtry-catchにする
+  const RESULT = {
+    "message": message,
+    "result": false,
+    "groupId": group_id,
+  };
+  let options = {
+    'headers': headers,
     'method': 'post',
-    'payload': JSON.stringify({
-      'to': property.getProperty("group_id"),  // グループの場合必須。トークの場合は無視される
-      'replyToken': reply_token,  // トークの場合必須。グループに送信した場合でも項目は存在する
-      'messages': [{
-        'type': 'text',
-        'text': message,
-      }],
-    }),
-  });
-  return ContentService.createTextOutput(JSON.stringify({'content': 'post ok'})).setMimeType(ContentService.MimeType.JSON);
+    'payload': JSON.stringify(payload),
+  };
+
+  try {
+    UrlFetchApp.fetch('https://api.line.me/v2/bot/message/' + TARGET_ENDPOINT, options);
+    RESULT.result = true;
+  } catch(e) {
+    output_sheet({error: "send_lineエラー"})
+    output_sheet(options)
+  }
+  return output_api(JSON.stringify(RESULT));
 }
