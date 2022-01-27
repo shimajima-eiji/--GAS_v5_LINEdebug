@@ -1,5 +1,8 @@
 // add_valueがJSONである場合、予めJSON.stringfyに掛けておくと、より詳細な内容にまで踏み込める
 function output_sheet(value = {}){
+  // デバッグフラグがOFFの場合は出力しない
+  if(property("DEBUG").value != "true") return;
+
   const SSID = property("SSID").value;
   const SSNAME = property("SSNAME").value;
   const SHEET = SpreadsheetApp.openById(SSID).getSheetByName(SSNAME);
@@ -10,8 +13,7 @@ function output_sheet(value = {}){
     message = "[COMPLETE]add data";
   }
 
-  debug("output.gs/output_sheet: " + message);
-  return message;
+  return debug("output.gs/output_sheet: " + message);
 }
 
 function output_api(json) {
