@@ -1,3 +1,8 @@
+const DEBUG_FLAG = false;
+function debug(message) {
+  if(DEBUG_FLAG) Logger.log(message);
+}
+
 // 開発中に間違えて実行すると悲惨なので、強制上書きされないようブロックしておく(1敗)
 const GUARD_KEYS = [
   "SSID",
@@ -49,7 +54,7 @@ function property(key, value, force_flag=false) {
   }
 
   // 入力したプロパティが表示されればOK
-  Logger.log("開発：環境変数設定.gs/property: " + message);
+  debug("開発：環境変数設定.gs/property: " + message);
   return {
     result: result,
     value: message
