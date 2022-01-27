@@ -1,5 +1,14 @@
+function debug_flag() {
+  if(property("DEBUG").value == "true") {
+    property("DEBUG", "false");
+  } else {
+    property("DEBUG", "true");
+  }
+}
+
 function debug(message) {
-  if(property("DEBUG").value == "true") Logger.log(message);
+  // propertyからdebugを呼んでいるため、無限ループ回避のため平打ちする
+  if(PropertiesService.getScriptProperties().getProperty("DEBUG") == "true") Logger.log(message);
 }
 
 // 開発中に間違えて実行すると悲惨なので、強制上書きされないようブロックしておく(1敗)
@@ -8,12 +17,14 @@ const GUARD_KEYS = [
   "SSNAME",
   "ACCESS_TOKEN",
 ];
+/*
 function initialize() {
   property("SSID", "", true);          // https://docs.google.com/spreadsheets/d/(ここがSSID)/edit
   property("SSNAME", "", true);        // 上記シート名
   property("ACCESS_TOKEN", "", true);  // https://developers.line.biz/console/channel/(LINEチャネル)/messaging-api?status=success のチャネルアクセストークン（長期）
   property("DEBUG", "false");
 }
+// */
 
 // get/setに対応
 function property(key, value, force_flag=false) {
