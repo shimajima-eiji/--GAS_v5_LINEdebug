@@ -40,7 +40,7 @@ contents.events[0]以下は以下の通り。
 JSON形式
 
 |パラメータ|出力例|
-|---|---|---|
+|---|---|
 |result|True/False|
 |message|リクエストボディの`.message.text`と同じ|
 |groupId|リクエストボディの`.source.groupId`と同じ|
