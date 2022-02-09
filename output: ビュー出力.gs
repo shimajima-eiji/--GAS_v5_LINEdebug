@@ -10,7 +10,7 @@ function __output_sheet(value = {}){
     message = "[COMPLETE]add data";
   }
 
-  return debug("output.gs/output_sheet: " + message);
+  return __debug("output.gs/output_sheet: " + message);
 }
 
 function __output_api(json) {
