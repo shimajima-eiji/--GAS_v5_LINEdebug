@@ -1,33 +1,33 @@
-function debug_flag() {
-  if(property("DEBUG").value == "true") {
-    property("DEBUG", "false");
-  } else {
-    property("DEBUG", "true");
-  }
+function __debug_flag() {
+  let flag = (__property("DEBUG").value == "true") 
+    ? "false"
+    : "true";
+  __property("DEBUG", flag);
 }
 
-function debug(message) {
+function __debug(message) {
   // propertyからdebugを呼んでいるため、無限ループ回避のため平打ちする
   if(PropertiesService.getScriptProperties().getProperty("DEBUG") == "true") Logger.log(message);
 }
 
-// 開発中に間違えて実行すると悲惨なので、強制上書きされないようブロックしておく(1敗)
+/* 開発中に間違えて実行すると悲惨なので、強制上書きされないようブロックしておく(1敗)
+function __initialize() {
+  __property("DEBUG", "false");
+  __property("SSID", "https://docs.google.com/spreadsheets/d/(これ)/edit", true);
+  __property("SSNAME", "シート名", true);
+  __property("ACCESS_TOKEN", "https://developers.line.biz/console/channel/(LINEチャネル)/messaging-api?status=success のチャネルアクセストークン（長期）", true);
+  __property("DEBUG_ID", "userId or groupId", true);
+}
+// */
+
 const GUARD_KEYS = [
   "SSID",
   "SSNAME",
   "ACCESS_TOKEN",
 ];
-/*
-function initialize() {
-  property("SSID", "", true);          // https://docs.google.com/spreadsheets/d/(ここがSSID)/edit
-  property("SSNAME", "", true);        // 上記シート名
-  property("ACCESS_TOKEN", "", true);  // https://developers.line.biz/console/channel/(LINEチャネル)/messaging-api?status=success のチャネルアクセストークン（長期）
-  property("DEBUG", "false");
-}
-// */
 
 // get/setに対応
-function property(key, value, force_flag=false) {
+function __property(key, value, force_flag=false) {
   let message = 
 
   // [stop]keyもvalueもない
@@ -63,7 +63,7 @@ function property(key, value, force_flag=false) {
   }
 
   // 入力したプロパティが表示されればOK
-  debug("開発：環境変数設定.gs/property: " + message);
+  __debug("開発：環境変数設定.gs/property: " + message);
   return {
     result: result,
     value: message
