@@ -23,7 +23,7 @@ jobs:
             git add -A
             git commit -m "Created README.md from README.gs by Github Actions"
             git pull
-            git push
+            git push origin main:avoid_protect
 
             echo "[COMPLETED] Update README.md"
           fi
