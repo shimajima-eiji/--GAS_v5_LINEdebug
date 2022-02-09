@@ -15,9 +15,9 @@ function __main_get_line(e) {
 
   const DATA = {
     message: json.message.text,
-    target: (json.source.userId)
-        ? json.source.userId
-        : json.source.groupId
+    target: (json.source.type == "group")
+      ? json.source.groupId
+      : json.source.userId
   }
 
   // 必要な情報が入っていればパラメータを抜き出す
